@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Telegram Bot Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-center mb-6">Telegram Bot Admin Panel</h1>
+    <div class="bg-white shadow-md rounded p-4 mb-4">
+      <h2 class="text-xl font-semibold mb-2">Bot Status</h2>
+      <p id="totalUsers">Loading...</p>
+    </div>
+    <div class="bg-white shadow-md rounded p-4 mb-4">
+      <h2 class="text-xl font-semibold mb-2">Broadcast</h2>
+      <textarea id="broadcastText" class="w-full p-2 border rounded mb-2" placeholder="Enter message"></textarea>
+      <button onclick="broadcastMessage()" class="bg-blue-600 text-white px-4 py-2 rounded">Send Broadcast</button>
+    </div>
+  </div>
+
+  <script>
+    const supabase = supabase.createClient(
+      'https://juyjcdxhppzvsolrofyd.supabase.co',
+      'YOUR_SUPABASE_ANON_KEY'
+    );
+
+    async function loadUsers() {
+      const { data } = await supabase.from('users').select('*');
+      document.getElementById('totalUsers').innerText = `Total Users: ${data.length}`;
+    }
+
+    async function broadcastMessage() {
+      const msg = document.getElementById('broadcastText').value;
+      await fetch(`https://api.telegram.org/botYOUR_BOT_API_KEY/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: '6926658281',
+          text: '/broadcast ' + msg
+        })
+      });
+      alert('Broadcast sent!');
+    }
+
+    loadUsers();
+  </script>
+</body>
+</html>
