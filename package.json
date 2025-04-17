@@ -8,6 +8,7 @@
     "start": "node bot.js"
   },
   "dependencies": {
-    "telebot-creator": "^1.2.3" 
+   "telebot-creator": "^2.0.8"
+ 
   }
 }
