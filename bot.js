@@ -1,17 +1,15 @@
 require('dotenv').config();
-const Telebot = require('telebot');
+const TelegramBot = require('node-telegram-bot-api');
 const fetch = require('node-fetch');
 const { createClient } = require('@supabase/supabase-js');
 
-const bot = new Telebot({
-  token: process.env.BOT_API_KEY,
-  polling: true
-});
+const bot = new TelegramBot(process.env.BOT_API_KEY, { polling: true });
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-const ADMIN_ID = process.env.ADMIN_ID;
+const ADMIN_ID = Number(process.env.ADMIN_ID);
 
-bot.on('/start', async (msg) => {
+// /start command
+bot.onText(/\/start/, async (msg) => {
   const userId = msg.from.id;
   const userName = msg.from.username;
   const { data } = await supabase.from('users').select('*').eq('user_id', userId);
@@ -22,35 +20,49 @@ bot.on('/start', async (msg) => {
   bot.sendMessage(userId, `Welcome back ${userName}! You have ${data[0].completions_left} completions left.`);
 });
 
-bot.on('/generate', async (msg) => {
+// /generate command
+bot.onText(/\/generate (.+)/, async (msg, match) => {
   const userId = msg.from.id;
+  const topic = match[1];
+
   const { data } = await supabase.from('users').select('*').eq('user_id', userId);
+  if (!data || data.length === 0) return bot.sendMessage(userId, 'Please register first using /start.');
+
   if (data[0].completions_left <= 0) {
     return bot.sendMessage(userId, 'No completions left. Please upgrade.');
   }
+
   await supabase.from('users').update({ completions_left: data[0].completions_left - 1 }).eq('user_id', userId);
   bot.sendMessage(userId, 'Generating content...');
+
   const res = await fetch("https://api.aimlapi.com/v1", {
     method: "POST",
-    headers: { "Authorization": `Bearer ${process.env.GENERATE_API_KEY}` },
-    body: JSON.stringify({ topic: msg.text })
+    headers: {
+      "Authorization": `Bearer ${process.env.GENERATE_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ topic })
   });
+
   const content = await res.json();
-  bot.sendMessage(userId, content.generated_text);
+  bot.sendMessage(userId, content.generated_text || 'No content received.');
 });
 
-bot.on('/broadcast', async (msg) => {
-  if (msg.from.id != ADMIN_ID) return bot.sendMessage(msg.from.id, 'Unauthorized.');
-  const text = msg.text.split(' ').slice(1).join(' ');
+// /broadcast command
+bot.onText(/\/broadcast (.+)/, async (msg, match) => {
+  if (msg.from.id != ADMIN_ID) return bot.sendMessage(msg.chat.id, 'Unauthorized.');
+
+  const text = match[1];
   const { data } = await supabase.from('users').select('user_id');
-  data.forEach(user => bot.sendMessage(user.user_id, text));
+  for (let user of data) {
+    bot.sendMessage(user.user_id, text);
+  }
   bot.sendMessage(ADMIN_ID, 'Broadcast complete.');
 });
 
-bot.on('/status', async (msg) => {
-  if (msg.from.id != ADMIN_ID) return bot.sendMessage(msg.from.id, 'Unauthorized.');
+// /status command
+bot.onText(/\/status/, async (msg) => {
+  if (msg.from.id != ADMIN_ID) return bot.sendMessage(msg.chat.id, 'Unauthorized.');
   const { data } = await supabase.from('users').select('user_id');
   bot.sendMessage(ADMIN_ID, `Active users: ${data.length}`);
 });
-
-bot.start();
