@@ -1,14 +1,14 @@
 {
-  "name": "telegram-bot",
+  "name": "telebot",
   "version": "1.0.0",
-  "description": "Telegram bot deployed on Railway",
+  "description": " kyro. ai deployed on Railway",
   "main": "bot.js",
   "type": "module",
   "scripts": {
     "start": "node bot.js"
   },
   "dependencies": {
-   "telebot-creator": "^2.0.8"
- 
+"telebot-creator": "^2.0.8"
+
   }
 }
