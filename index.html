@@ -24,7 +24,7 @@
   <script>
     const supabase = supabase.createClient(
       'https://juyjcdxhppzvsolrofyd.supabase.co',
-      'YOUR_SUPABASE_ANON_KEY'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1eWpjZHhocHB6dnNvbHJvZnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MDQzOTQsImV4cCI6MjA2MDM4MDM5NH0.RO1Pc1eh6FIJ_scyG0uGwNO9ryJRWDzNAym7u3RNeK4'
     );
 
     async function loadUsers() {
@@ -34,7 +34,7 @@
 
     async function broadcastMessage() {
       const msg = document.getElementById('broadcastText').value;
-      await fetch(`https://api.telegram.org/botYOUR_BOT_API_KEY/sendMessage`, {
+      await fetch(`https://api.telegram.org/bot7318058751:AAFNE_kcPRJkOK9NiY4IICjPlppyv_-PAs4/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
